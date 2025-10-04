@@ -38,6 +38,7 @@ numpy==1.26.4
 opt_einsum==3.4.0
 optax==0.1.5
 packaging==25.0
+pandas==2.3.2
 parso==0.8.4
 PennyLane==0.37.0
 PennyLane_Lightning==0.37.0
