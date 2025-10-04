@@ -1,14 +1,6 @@
 """
 PPO benchmark for the custom UAV_LQDRL_Environment.
 
-What this script does
----------------------
-1) Instantiates your environment from `uav_lqdrl_env.py`.
-2) Trains a Stable-Baselines3 PPO agent.
-3) Logs custom metrics every step (sum rates, secrecy rates, energy efficiency, energy consumption, UAV position).
-4) Saves the trained model and CSV logs.
-5) Generates Matplotlib plots for key metrics (one chart per figure, no seaborn/colors).
-
 Requirements
 ------------
 - Python 3.10+
@@ -19,13 +11,9 @@ Requirements
 - matplotlib
 - pandas
 
-Install (example):
-    pip install gymnasium numpy scipy stable-baselines3 matplotlib pandas
-
 Usage
 -----
-1) Ensure `uav_lqdrl_env.py` (your environment file from the prompt) is in the same folder.
-2) Run training:
+1) Run training:
        python ppo_benchmark_uav.py --timesteps 200_000 --seed 42
 3) Outputs:
    - ./ppo_uav_logs/  (CSV logs)
@@ -37,7 +25,6 @@ Notes
 - This script queries metrics directly from the environment via getters:
   `get_sum_rates()`, `get_secrecy_rates()`, `get_energy_efficiency()`,
   `get_uav_position()`, `get_energy_cons()`.
-- If you change these names or return types, adjust accordingly below.
 """
 from __future__ import annotations
 import os
