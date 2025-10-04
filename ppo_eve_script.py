@@ -52,17 +52,18 @@ critic = QuantumCritic(n_qubits=state_dim+action_dim, m_layers=1)
 capacity = 100000
 buffer = Memory(capacity)
 
-
-
 model = PPO('MlpPolicy', env, verbose=1)
-model.learn(total_timesteps=10000)
+model.learn(total_timesteps=500)
 model.save('ppo_lqdrl_secrecy_1')
 
+# NOTE: SIMULATION PARAMETERS
+# COULD TINKER WITH THESE AND RUN EXPERIMENTS WITH DIFFERENT ONES FOR EACH 
 m_layers = 1
 episodes = 30
 batch_size = 30
 gamma = 0.99
 max_act_scale = 1e15
+
 time_step = 1
 time_arr = []
 
@@ -102,7 +103,7 @@ def plot_uav_trajectory(env, uav_trajectory, layer, ep, t):
         ax.scatter(uav_position[0], uav_position[1], uav_position[2], label="UAV Positions", color="cyan")
     ax.scatter(*centroid, label="GU Centroid", color="red", marker="X", s=100)
     plt.legend()
-    plt.savefig(f'eve_outputs/plots_eve_outputs/test3/{layer+1}_layers_uav_trajectory_{ep}_timestep_{t}.png')
+    plt.savefig(f'ppo_outputs/{layer+1}_layers_uav_trajectory_{ep}_timestep_{t}.png')
     plt.close()
 
 def gradient_norm(grad):
@@ -130,7 +131,107 @@ def evaluate_agent(model, env, num_episodes):
 
     return episode_rewards, masr_values
 
+for ep in range(episodes):
+    state, _ = env.reset()
+    ep_start_time = time.time()
+    ep_uav_traj = []
+    dist_to_centroid_arr = []
+    step_rewards_arr = []
+    step_sum_rate_arr = []
+    step_energy_eff_arr = []
+    step_remaining_energy_arr = []
+    step_energy_cons_arr = []
+    step_secrecy_rates_arr = []
+    break_var = 0
+    step = 0
+    done = False
+    tot_reward = 0
+
+    while not done:
+        step_start_time = time.time()
+        uav_pos = env.get_uav_position()
+        uav_energy = env.get_remaining_energy()
+        energy_cons = env.E_MAX - uav_energy 
+        ep_uav_traj.append(uav_pos)
+        uav_energy_perc = uav_energy / env.E_MAX
+
+        with open(f'{ep}_uav_energy.txt', 'w') as f:
+            f.write(uav_energy)
+            f.write("\n")
+
+        with open(f'{ep}_uav_energy_perc.txt', 'w') as f:
+            f.write(uav_energy_perc)
+            f.write("\n")
+
+        with open(f'{ep}_uav_position.txt', 'w') as f:
+            f.write(uav_pos)
+            f.write("\n")
+
+        gu_centroid = np.mean([gu.position for gu in env.legit_users], axis=0)
+        gu_centroid[2] += 10
+
+        dist_to_centroid = np.linalg.norm(uav_pos - gu_centroid)
+
+        with open(f'{ep}_dist_to_centroid.txt', 'w') as f:
+            f.write(dist_to_centroid)
+            f.write("\n")
+
+        uav_energy_eff = env.get_energy_efficiency()
+        with open(f'{ep}_uav_energy_efficiency.txt', 'w') as f:
+            f.write(uav_energy_eff)
+            f.write("\n")
+
+        step_remaining_energy_arr.append(uav_energy)
+        step_energy_eff_arr.append(uav_energy_eff)
+
+        sum_rates = env.get_sum_rates()
+        step_sum_rate_arr.append(sum_rates)
+
+        with open(f'{ep}_uav_sum_rates.txt', 'w') as f:
+            f.write(sum_rates)
+            f.write("\n")
+
+        secrecy_rates = [0 for gu in env.num_legit_users]
+        secrecy_rates = env.get_secrecy_rates()
+        for eve_m in range(len(secrecy_rates)):
+            sr = secrecy_rates[eve_m]
+            if math.isnan(sr) is True:
+                secrecy_rates[eve_m] = 0.0
+
+        with open(f'{ep}_uav_secrecy_rates.txt', 'w') as f:
+            f.write(secrecy_rates)
+            f.write("\n")
+
+        step_secrecy_rates_arr.append(secrecy_rates)
+
+        # TODO: DEFINE ACTION & ACTOR
+        # POSSIBLY DEFINE RANDOM ACTION INPUT VECTOR WITH ASSOCIATED POLICY GRADIENTS
+        state_tensor = jnp.array(state)
+        uav = env.uavs[0] # UAV-BS
+        #action = uav.move()
+        next_state, reward, done, _, _ = env.step(action)
+        buffer.store([state, action, reward, next_state, done])
+        tot_reward += reward
+        state = next_state
+
+        if len(buffer) >= batch_size:
+            b_idx, batch = buffer.sample(batch_size)
+            states, actions, rewards, next_states, dones = map(np.array, zip(*batch))
+
+            # TODO: ACTOR & CRITIC LOSS HERE 
+            # Policy gradient calculation happens here
+
+        step += 1
+
+        # TODO: INTERFACE THE PER WITH THE PPO ALGORITHM
+
+        # TODO: Gather UAV data and store it in text files with a newline delimiter
+        # PLOT THIS DATA IN SEPARATE SCRIPTS 
+        # WRITE BASH SCRIPT TO RUN ALL OF THE SCRIPTS CONSECUTIVELY 
 
 total_runtime_end = time.time()
+
+# TODO: STORE STEP-WISE DATA IN RESPECTIVE TEXT FILES
+# IN PLOTTING SCRIPT, TAKE THE SUM OF THE DATA AND/OR OTHER OPERATIONS FOR FURTHER ANALYSIS
 
 total_runtime = total_runtime_end - total_runtime_start
