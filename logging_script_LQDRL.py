@@ -108,8 +108,8 @@ for m in range(m_layers):
     actor_opt_state = actor_opt.init(actor.theta)
     critic_opt_state = critic_opt.init(critic.theta)
 
-    #episodes = 30
-    episodes = 5
+    episodes = 30
+    #episodes = 5
     batch_size = 30
     gamma = 0.99
     max_act_scale = 1e15
@@ -309,17 +309,6 @@ for m in range(m_layers):
 logs_dir = os.path.join("local_test_outputs/qdrl_uav_logs/test5")
 #plots_dir = os.path.join("qdrl_outputs/qdrl_uav_plots/test2")
 plots_dir = os.path.join("local_test_outputs/qdrl_uav_plots/test5")
-
-'''
-dfs = arrays_to_dataframes(
-    ep_sum_rate_arr,
-    ep_energy_eff_arr,
-    ep_secrecy_rates_arr,
-    ep_energy_cons_arr,
-    tot_reward_arr,
-    uav_pos_arr,
-)
-'''
 
 dfs = arrays_to_dataframes(all_sum_rates, all_energy_eff, all_secrecy_rates, all_energy_cons, all_rewards, all_uav_pos, all_dist_to_centroid)
 
