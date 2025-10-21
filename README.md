@@ -20,4 +20,9 @@ Create a and activate Python virtual environment using pip.
 ``source ppo_env/bin/activate``
 Install the required dependencies within this virtual environment.
 ``pip install -r requirements.txt``
-Run the PPO-based simulation, ensuring you have created the required directory structure used in the programme. I may add a bash script to do this automatically for end users.
+Run the PPO-based simulation, ensuring you have created the required directory structure used in the program. I may add a bash script to do this automatically for end users.
+``python3 ppo_script.py --timesteps 200_000 --seed 42``
+Run the QDRL-based simulation, again ensuring that you have the required directory structure as used in the program.
+``python3 logging_script_LQDRL.py``
+To visualise the results from these experiments, run the plotting utilities program.
+``python3 script_plot.py``
