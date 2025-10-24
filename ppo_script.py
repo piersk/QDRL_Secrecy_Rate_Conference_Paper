@@ -199,108 +199,6 @@ class MetricsCallback(BaseCallback):
             "dist_to_centroid": df_dist,
         }
 
-
-# ----------------------
-# Plotting (matplotlib)
-# ----------------------
-def plot_sum_rates(df_sum: pd.DataFrame, out_dir: str):
-    if df_sum.empty:
-        return
-    # one figure with multiple lines (episode/gu pairs) — no custom colors
-    fig = plt.figure()
-    # Aggregate by episode & GU
-    for (ep, gu), group in df_sum.groupby(["episode", "gu" ]):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["sum_rate"].values, label=f"ep{ep}-gu{gu}")
-    plt.xlabel("timestep")
-    plt.ylabel("sum rate (bps)")
-    plt.title("Sum rates per GU over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "sum_rates.png"), dpi=150)
-    plt.close(fig)
-
-
-def plot_secrecy_rates(df_sec: pd.DataFrame, out_dir: str):
-    if df_sec.empty:
-        return
-    fig = plt.figure()
-    for (ep, gu), group in df_sec.groupby(["episode", "gu" ]):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["secrecy_rate"].values, label=f"ep{ep}-gu{gu}")
-    plt.xlabel("timestep")
-    plt.ylabel("secrecy rate (bps)")
-    plt.title("Secrecy rates per GU over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "secrecy_rates.png"), dpi=150)
-    plt.close(fig)
-
-
-def plot_energy_eff(df_eff: pd.DataFrame, out_dir: str):
-    if df_eff.empty:
-        return
-    fig = plt.figure()
-    for ep, group in df_eff.groupby("episode"):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["energy_eff"].values, label=f"ep{ep}")
-    plt.xlabel("timestep")
-    plt.ylabel("energy efficiency (bps/J)")
-    plt.title("Energy efficiency over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "energy_efficiency.png"), dpi=150)
-    plt.close(fig)
-
-
-def plot_energy_cons(df_ec: pd.DataFrame, out_dir: str):
-    if df_ec.empty:
-        return
-    fig = plt.figure()
-    for ep, group in df_ec.groupby("episode"):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["energy_cons"].values, label=f"ep{ep}")
-    plt.xlabel("timestep")
-    plt.ylabel("energy consumed so far (J)")
-    plt.title("Energy consumption over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "energy_consumption.png"), dpi=150)
-    plt.close(fig)
-
-
-def plot_rewards(df_rew: pd.DataFrame, out_dir: str):
-    if df_rew.empty:
-        return
-    fig = plt.figure()
-    for ep, group in df_rew.groupby("episode"):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["reward"].values, label=f"ep{ep}")
-    plt.xlabel("timestep")
-    plt.ylabel("reward")
-    plt.title("Step rewards over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "rewards.png"), dpi=150)
-    plt.close(fig)
-
-
-def plot_uav_altitude(df_pos: pd.DataFrame, out_dir: str):
-    if df_pos.empty:
-        return
-    fig = plt.figure()
-    for ep, group in df_pos.groupby("episode"):
-        group = group.sort_values("t")
-        plt.plot(group["t"].values, group["z"].values, label=f"ep{ep}")
-    plt.xlabel("timestep")
-    plt.ylabel("UAV altitude (m)")
-    plt.title("UAV altitude over time")
-    plt.legend(loc="best", fontsize=8)
-    fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "uav_altitude.png"), dpi=150)
-    plt.close(fig)
-
-
 # ----------------------
 # Save CSV helper
 # ----------------------
@@ -368,14 +266,6 @@ def main():
     # Export logs to CSV
     dfs = metrics_cb.episodes_to_dataframes()
     save_csvs(dfs, logs_dir)
-
-    # Plots
-    plot_sum_rates(dfs["sum_rates"], plots_dir)
-    plot_secrecy_rates(dfs["secrecy_rates"], plots_dir)
-    plot_energy_eff(dfs["energy_eff"], plots_dir)
-    plot_energy_cons(dfs["energy_cons"], plots_dir)
-    plot_rewards(dfs["rewards"], plots_dir)
-    plot_uav_altitude(dfs["uav_pos"], plots_dir)
 
     print("\n=== Training complete ===")
     print(f"Model saved to: {model_path}.zip")
