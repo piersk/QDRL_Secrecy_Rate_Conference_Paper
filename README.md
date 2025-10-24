@@ -39,4 +39,4 @@ Run the QDRL-based simulation, again ensuring that you have the required directo
 
 To visualise the results from these experiments, run the plotting utilities program.
 
-``python3 script_plot.py``
+``python3 ep_time_plot_script.py``
