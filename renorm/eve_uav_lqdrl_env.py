@@ -178,7 +178,8 @@ class UAV_LQDRL_Environment(gym.Env):
 
         self.P_MAX = 30     # 30 dBm
         self.E_MAX = 50e03  # 50kJ 
-        self.R_MIN = 9.5e06 # R_min = 9.5 Mbps
+        #self.R_MIN = 9.5e06 # R_min = 9.5 Mbps
+        self.R_MIN = 9.5e06 / (num_legit_users / 4)
         self.V_MAX = 50     # 50 m/s 
         self.xmin, self.ymin, self.zmin = xmin, ymin, zmin
         self.xmax, self.ymax, self.zmax = xmax, ymax, zmax
