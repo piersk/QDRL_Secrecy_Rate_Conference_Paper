@@ -19,6 +19,7 @@ import os
 import argparse
 import numpy as np
 import pandas as pd
+import sys
 
 def config_string(m_layers, n_users, n_eves, xmax, ymax, zmax):
     return f"L{m_layers}_K{n_users}_E{n_eves}_X{xmax}_Y{ymax}_Z{zmax}"
@@ -44,8 +45,6 @@ def plot_uav_trajectory(env, uav_trajectory, layer, ep, t, plots_dir):
         ax.scatter(uav_position[0], uav_position[1], uav_position[2], label="UAV Positions", color="cyan")
     ax.scatter(*centroid, label="GU Centroid", color="red", marker="X", s=100)
     plt.legend()
-    #plt.savefig(f'eve_outputs/plots_eve_outputs/test1/{layer+1}_layers_uav_trajectory_{ep}_timestep_{t}.png')
-    #plt.savefig(f'qdrl_outputs/qdrl_uav_plots/test1/{layer+1}_layers_uav_trajectory_{ep}_timestep_{t}.png')
     plt.savefig(os.path.join(plots_dir, f'{layer+1}_layers_uav_trajectory_{ep}_timestep_{t}.png'))
     plt.close()
 
@@ -109,18 +108,19 @@ overall_start_time = time.time()
 
 m_layers = 1
 K_GUs = 8
-min_list = [0, 25, 50, 75, 100, 125]
-max_list = [150, 125, 100, 75, 50, 25]
+#min_list = [0, 25, 50, 75, 100, 125]
+#max_list = [150, 125, 100, 75, 50, 25]
+min_list = [0, 50, 100]
+max_list = [150, 100, 50]
 zmin = 0
 zmax = 122
 for m in range(m_layers):
-    for g in range(2, K_GUs+1):
+    for g in [2, 4, 6, 8]:
         it = len(max_list)
         for min_val in min_list:
             for max_val in max_list[0:it]:
                 print(f"============ Experiment with {m+1} Layers in Ansatz ============")
-                if g % 2 == 0:
-                    num_eves = g // 2
+                num_eves = g // 2
                 env = UAV_LQDRL_Environment(
                     num_legit_users=g,
                     num_eves=num_eves,
@@ -144,11 +144,10 @@ for m in range(m_layers):
 
                 experiment_dir = os.path.join(
                     "qdrl_outputs",
-                    "experiments",
+                    sys.argv[1],
                     exp_name
                 )
                 plots_dir = os.path.join(experiment_dir, "plots")
-                #logs_dir = os.path.join("qdrl_outputs/qdrl_uav_logs/test1")
                 os.makedirs(experiment_dir, exist_ok=True)
                 os.makedirs(plots_dir, exist_ok=True)
                 print("\nRunning Experiment: ", exp_name, "\n")
@@ -170,7 +169,8 @@ for m in range(m_layers):
                 actor_opt_state = actor_opt.init(actor.theta)
                 critic_opt_state = critic_opt.init(critic.theta)
 
-                episodes = 30
+                #episodes = 30
+                episodes = 10
                 #episodes = 5
                 batch_size = 30
                 gamma = 0.99
@@ -337,8 +337,8 @@ for m in range(m_layers):
                         print(f"Time taken for step {i} to execute: ", abs(step_time), " seconds")
                         i += 1
                         # Break out of episode early (for debugging purposes)
-                        if i == 10:
-                            break
+                        #if i == 10:
+                        #    break
                         if dist_to_centroid_arr[i-2] is not None:
                             diff = dist_to_centroid_arr[i-2] - dist_to_centroid_arr[i-1]
                             if (diff <= 0.1):
@@ -371,15 +371,6 @@ for m in range(m_layers):
 
                 save_csvs(dfs, experiment_dir)
             it -= 1
-
-#logs_dir = os.path.join("qdrl_outputs/qdrl_uav_logs/test1")
-##logs_dir = os.path.join("local_test_outputs/qdrl_uav_logs/test5")
-#plots_dir = os.path.join("qdrl_outputs/qdrl_uav_plots/test1")
-##plots_dir = os.path.join("local_test_outputs/qdrl_uav_plots/test5")
-#
-#dfs = arrays_to_dataframes(all_sum_rates, all_energy_eff, all_secrecy_rates, all_energy_cons, all_rewards, all_uav_pos, all_dist_to_centroid)
-#
-#save_csvs(dfs, logs_dir)
 
 overall_end_time = time.time()
 overall_time = abs(overall_end_time - overall_start_time)

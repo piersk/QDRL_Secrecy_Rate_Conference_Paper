@@ -35,7 +35,7 @@ Run the PPO-based simulation, ensuring you have created the required directory s
 
 Run the QDRL-based simulation, again ensuring that you have the required directory structure as used in the program.
 
-``python3 logging_script_LQDRL.py``
+``python3 logging_script_LQDRL.py experiment_directory``
 
 To visualise the results from these experiments, run the plotting utilities program.
 
