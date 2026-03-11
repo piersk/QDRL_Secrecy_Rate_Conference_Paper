@@ -63,10 +63,10 @@ class UAV:
         delta_clipped = self.position - clipped_pos
 
         self.position += delta_pos
-        print("Change in UAV Position: ", delta_pos)
-        print("Clipped Change in UAV Position: ", delta_clipped)
+        #print("Change in UAV Position: ", delta_pos)
+        #print("Clipped Change in UAV Position: ", delta_clipped)
         self.velocity = dist
-        print("UAV Velocity: ", self.velocity)
+        #print("UAV Velocity: ", self.velocity)
         self.history.append(self.position.copy())
 
     def get_distance_travelled(self):
@@ -250,7 +250,7 @@ class UAV_LQDRL_Environment(gym.Env):
         min_v = 5
         v = zeta * self.V_MAX
         v = max(v, min_v)
-        print("UAV Velocity: ", v, " m/s")
+        #print("UAV Velocity: ", v, " m/s")
         return v
 
     def get_uav_position(self):
@@ -397,7 +397,7 @@ class UAV_LQDRL_Environment(gym.Env):
             else:
                 zeta = 1
             dist = self.compute_velocity(zeta) * self.delta_t
-            print("UAV Velocity (step): ", dist, "m/s")
+            #print("UAV Velocity (step): ", dist, "m/s")
             
             # Direction vector from UAV to centroid (normalized)
             direction_to_centroid = gu_centroid - uav.position
@@ -435,9 +435,9 @@ class UAV_LQDRL_Environment(gym.Env):
                 awgn_arr.append(awgn)
                 channel_gain = self.rician_channel(dist_from_gu, uav_pos, gu_pos, self.PATHLOSS_COEFF)
                 i += 1
-                print(f"GU {i} Channel Gain: ", channel_gain)
+                #print(f"GU {i} Channel Gain: ", channel_gain)
                 channel_gain_arr.append(channel_gain)
-                print(f"Distance between UAV & GU {i}: ", dist_from_gu, " m")
+                #print(f"Distance between UAV & GU {i}: ", dist_from_gu, " m")
 
             tx_power_arr = []
             snr_arr = []
@@ -466,58 +466,58 @@ class UAV_LQDRL_Environment(gym.Env):
                     eve_pos = eve.position
                     eve_dist_to_uav = abs(np.linalg.norm(uav.position - eve.position))
                     eve_channel_gain = self.rician_channel(eve_dist_to_gu, uav_pos, eve_pos, self.PATHLOSS_COEFF)
-                    print(f"Eve {j} Channel Gain for GU {k}: ", eve_channel_gain)
+                    #print(f"Eve {j} Channel Gain for GU {k}: ", eve_channel_gain)
                     eve_tx_pwr = self.P_MAX / self.num_eves
                     noise_signature = uav.generate_additive_noise_signature(eve_noise_factor, self.f_carr, self.delta_t)
                     noise_signature_arr.append(noise_signature['power'])
                     noise_env = self.dbm_to_watt(self.NOISE_LOS)
                     tot_noise = noise_signature['power'] + noise_env
                     eve_snr = self.compute_snr(eve_tx_pwr, eve_channel_gain, tot_noise)
-                    print(f"Eve {j} SNR for GU {k}: ", eve_snr)
+                    #print(f"Eve {j} SNR for GU {k}: ", eve_snr)
                     eve_snr_arr.append(eve_snr)
                     eve_subchan_bw = self.f_carr / self.num_legit_users
                     eve_rate = self.compute_r_k(eve_subchan_bw, eve_snr)
-                    print(f"Eavesdropping Rate {j} for GU {k}: ", eve_rate)
+                    #print(f"Eavesdropping Rate {j} for GU {k}: ", eve_rate)
                     eve_rate_arr.append(eve_rate)
 
-            print("Eavesdropper SNR: ", eve_snr_arr)
+            #print("Eavesdropper SNR: ", eve_snr_arr)
             eve_rate_arr.sort(reverse=True)
-            print("Eavesdropping Rate: ", eve_rate_arr)
+            #print("Eavesdropping Rate: ", eve_rate_arr)
             used_noise_signatures = noise_signature_arr[:self.num_legit_users]
-            print("Used Noise Signatures: ", used_noise_signatures)
+            #print("Used Noise Signatures: ", used_noise_signatures)
             used_noise_signatures.sort(reverse=True)
             uav.noise_signatures = used_noise_signatures 
             worst_case_eve_rate_arr = eve_rate_arr[:self.num_legit_users]
 
-            print("Worst-Case Eavesdropping Rate: ", worst_case_eve_rate_arr)
+            #print("Worst-Case Eavesdropping Rate: ", worst_case_eve_rate_arr)
             
             for k, gu in enumerate(self.legit_users):
-                print("=================================")
+                #print("=================================")
                 gain = channel_gain_arr[k]
                 pwr_delta = self.compute_power_coefficients(gain, channel_gain_arr)
-                print(f"Power scaling variable {k}: ", pwr_delta)
+                #print(f"Power scaling variable {k}: ", pwr_delta)
                 tx_power = self.compute_power_allocation(pwr_delta)
-                print(f"Transmit Power {k}: ", tx_power, "dBm")
+                #print(f"Transmit Power {k}: ", tx_power, "dBm")
                 tx_power = self.dbm_to_watt(tx_power)
-                print(f"Transmit Power {k}: ", tx_power, "W")
+                #print(f"Transmit Power {k}: ", tx_power, "W")
                 tx_power_arr.append(tx_power)
                 noise_kn = self.dbm_to_watt(self.NOISE_LOS)
-                print(f"AWGN {k}: ", noise_kn)
+                #print(f"AWGN {k}: ", noise_kn)
                 snr_legit = self.compute_snr(tx_power, gain, noise_kn)
-                print(f"SNR {k}: ", snr_legit)
-                print(f"SNR {k}: ", 20 * np.log10(snr_legit), "dB")
+                #print(f"SNR {k}: ", snr_legit)
+                #print(f"SNR {k}: ", 20 * np.log10(snr_legit), "dB")
                 snr_arr.append(snr_legit)
                 bw_subchan = bw_arr[k]
-                print(f"Subchannel Bandwidth {k}: ", bw_subchan, "Hz")
+                #print(f"Subchannel Bandwidth {k}: ", bw_subchan, "Hz")
                 r_kn = self.compute_r_k(bw_subchan, snr_legit)
-                print(f"Data rate {k}: ", r_kn, "bps")
+                #print(f"Data rate {k}: ", r_kn, "bps")
                 sum_rate_arr.append(r_kn)
             self.curr_sum_rates = sum_rate_arr
 
             secrecy_rate_arr = []
             for m in range(self.num_legit_users):
                 secrecy_rate = sum_rate_arr[m] - eve_rate_arr[m]
-                print(f"Secrecy Rate {m}: ", secrecy_rate)
+                #print(f"Secrecy Rate {m}: ", secrecy_rate)
                 secrecy_rate_arr.append(secrecy_rate)
 
             secrecy_rate_arr = [float(sr) if np.isfinite(sr) else 0.0 for sr in secrecy_rate_arr]
@@ -525,8 +525,8 @@ class UAV_LQDRL_Environment(gym.Env):
                 f"Expected {self.num_legit_users} secrecy rates, got {len(secrecy_rate_arr)}"
             )
             uav.secrecy_rate = secrecy_rate_arr
-            print("Secrecy Rate: ", secrecy_rate_arr)
-            print("Secrecy Rate: ", uav.secrecy_rate)
+            #print("Secrecy Rate: ", secrecy_rate_arr)
+            #print("Secrecy Rate: ", uav.secrecy_rate)
 
         # Energy consumption should only occur once per step for 1 UAV and once per UAV per step if multiple UAV-BSs are to be used
         sum_rate_hz_arr = []
@@ -535,7 +535,7 @@ class UAV_LQDRL_Environment(gym.Env):
             sum_rate_hz_arr.append(sum_rate_hz)
 
         uav_energy_cons = uav.compute_energy_consumption(tx_power_arr, sum_rate_hz_arr)
-        print("UAV Energy Consumption: ", uav_energy_cons)
+        #print("UAV Energy Consumption: ", uav_energy_cons)
         uav.energy -= uav_energy_cons
 
         gu_diffs = []
@@ -568,11 +568,11 @@ class UAV_LQDRL_Environment(gym.Env):
             self.pwr_penalty, self.alt_penalty, self.range_penalty,
             self.min_rate_penalty, self.energy_penalty, self.velocity_penalty
         ]))
-        print("Reward Boost Factor: ", reward_boost)
-        print("Energy Consumption Penalty Factor: ", energy_cons_penalty)
-        print("Total Penalties Factor: ", total_penalty)
+        #print("Reward Boost Factor: ", reward_boost)
+        #print("Energy Consumption Penalty Factor: ", energy_cons_penalty)
+        #print("Total Penalties Factor: ", total_penalty)
         reward -= reward * (total_penalty + energy_cons_penalty)
-        print("Reward for step: ", reward)
+        #print("Reward for step: ", reward)
         
         return self._get_obs(), reward, done, False, {}
 
@@ -585,25 +585,25 @@ class UAV_LQDRL_Environment(gym.Env):
         uav.prev_energy_consumption = energy_consumption
         energy_eff = self._compute_energy_efficiency(masr, energy_consumption)
         uav.energy_efficiency = energy_eff 
-        print("Energy Efficiency: ", energy_eff)
+        #print("Energy Efficiency: ", energy_eff)
         j = 0
         for k in range(0, self.num_legit_users):
             sum_rate = sum_rate_arr[k]
-            print(f"Sum Rate {k}: ", sum_rate)
+            #print(f"Sum Rate {k}: ", sum_rate)
             if sum_rate > self.R_MIN:
                 reward += energy_eff / self.num_legit_users
                 j += 1
                 if k == (self.num_legit_users - 1) and k == (j - 1):
                     grant_reward = True
 
-        print("Reward Allocated: ", grant_reward)
+        #print("Reward Allocated: ", grant_reward)
 
         if grant_reward == True:
             reward = energy_eff
-            print("All users above R_min")
+            #print("All users above R_min")
         else:
             #reward -= (self.num_legit_users - j) * reward
-            print("Not all users above R_min")
+            #print("Not all users above R_min")
 
         return reward
 

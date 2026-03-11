@@ -77,14 +77,14 @@ def save_csvs(dfs, experiment_dir):
 
             df.to_csv(path, index=False)
 
-            print(f"[LOG] Saved {path}")
+            #print(f"[LOG] Saved {path}")
 
 #def save_csvs(dfs, logs_dir):
 #    for name, df in dfs.items():
 #        if not df.empty:
 #            path = os.path.join(logs_dir, f"{name}.csv")
 #            df.to_csv(path, index=False)
-#            print(f"[LOG] Saved {path}")
+#            #print(f"[LOG] Saved {path}")
 
 def gradient_norm(grad):
     return jnp.sqrt(sum([jnp.sum(jnp.square(g)) for g in grad]))
@@ -228,23 +228,23 @@ for m in range(m_layers):
 
                         uav_energy_perc = uav_energy / env.E_MAX
 
-                        print("Remaining UAV Energy: ", uav_energy, " J")
+                        #print("Remaining UAV Energy: ", uav_energy, " J")
 
-                        print("Percentage of Remaining UAV Energy: ", uav_energy_perc * 100, "%")
+                        #print("Percentage of Remaining UAV Energy: ", uav_energy_perc * 100, "%")
 
-                        print("UAV Position Co-ordinates: ", uav_pos)
+                        #print("UAV Position Co-ordinates: ", uav_pos)
 
                         gu_centroid = np.mean([gu.position for gu in env.legit_users], axis=0)
                         gu_centroid[2] += 10
-                        print("GU Centroid Co-ordinates: ", gu_centroid)
+                        #print("GU Centroid Co-ordinates: ", gu_centroid)
 
                         dist_to_centroid = np.linalg.norm(uav_pos - gu_centroid)
                         dist_to_centroid_arr.append(dist_to_centroid)
-                        print("Distance of UAV from GU Centroid: ", dist_to_centroid, "m")
+                        #print("Distance of UAV from GU Centroid: ", dist_to_centroid, "m")
                         all_dist_to_centroid.append([ep, i, dist_to_centroid])
 
                         energy_efficiency = env.get_energy_efficiency()
-                        print(f"Energy Efficiency for step {i}: ", energy_efficiency)
+                        #print(f"Energy Efficiency for step {i}: ", energy_efficiency)
                         all_energy_eff.append([ep, i, energy_efficiency])
 
                         step_remaining_energy_arr.append(uav_energy)
@@ -253,11 +253,11 @@ for m in range(m_layers):
                         #state_tensor = np.array(state, requires_grad=False)
                         state_tensor = jnp.array(state)
                         action = actor(state_tensor)
-                        print("Action: ", action)
+                        #print("Action: ", action)
                         action = jnp.tanh(jnp.array(action)) * max_act_scale
-                        print("Action Scaled along Hyperbolic Tangent: ", action)
+                        #print("Action Scaled along Hyperbolic Tangent: ", action)
                         action = np.clip(np.array(action), -1, 1)
-                        print("Clipped Action: ", action)
+                        #print("Clipped Action: ", action)
 
                         next_state, reward, done, _, _ = env.step(action)
                         #buffer.push(state, action, reward, next_state, done)
@@ -282,7 +282,7 @@ for m in range(m_layers):
                                 secrecy_rates[eve_m] = 0.0
                         secrecy_rates = [float(sr) if np.isfinite(sr) else 0.0 for sr in secrecy_rates]
                         step_secrecy_rates_arr.append(secrecy_rates)
-                        print(f"Secrecy Rates for Step {i}: ", secrecy_rates)
+                        #print(f"Secrecy Rates for Step {i}: ", secrecy_rates)
 
                         for gu in range(env.num_legit_users):
                             all_secrecy_rates.append([ep, i, gu, secrecy_rates[gu]])
@@ -362,7 +362,7 @@ for m in range(m_layers):
                     ep_energy_cons_arr.append(step_energy_cons_arr)
                     ep_secrecy_rates_arr.append(step_secrecy_rates_arr)
 
-                print("All good so far")
+                #print("All good so far")
                 total_runtime_end = time.time()
                 total_runtime = abs(total_runtime_end - total_runtime_start)
                 print(f"Total Time Taken for Experiment with {m+1} Layers to Run: ", total_runtime)
